@@ -24,10 +24,10 @@ struct RTMenuItem {
 
 class RTMenu: UIView {
     enum MenuPosition: Int {
-        case topLeft // 菜单右下对齐按钮左上
-        case bottomLeft // 菜单右上对齐按钮左下
-        case topRight // 菜单左下对齐按钮右上
-        case bottomRight // 菜单左上对齐按钮右下
+        case topLeft // 菜单右下对齐view左上
+        case bottomLeft // 菜单右上对齐view左下
+        case topRight // 菜单左下对齐view右上
+        case bottomRight // 菜单左上对齐view右下
     }
 
     // MARK: - 可配置属性（外部可动态修改）
@@ -38,31 +38,30 @@ class RTMenu: UIView {
     var menuWidth: CGFloat = 160
     /// 选项行高（默认 44pt）
     var rowHeight: CGFloat = 44
-    /// 菜单与按钮的间距（默认 4pt）
-    var spacing: CGFloat = 4
+    /// 菜单与view的间距（默认 4pt）
+    var spacing: CGFloat = 10
     /// 菜单圆角（默认 8pt）
-    var cornerRadius: CGFloat = 8
+    var cornerRadius: CGFloat = 10
     /// 菜单阴影（默认开启）
     var hasShadow: Bool = true
     /// 开启遮罩（默认关闭）
     var hasMaskView: Bool = false
-    /// 文本edge（默认 top: 16, left: 0, bottom: 0, right: 16）
-    var titleEdge:UIEdgeInsets = .init(top: 16, left: 0, bottom: 0, right: 16)
+    /// 文本edge（(top: 0, left: 16, bottom: 0, right: 16)）
+    var titleEdge: UIEdgeInsets = .init(top: 0, left: 16, bottom: 0, right: 16)
     /// 数据源（动态更新时直接赋值即可）
     var items: [RTMenuItem] = [] {
         didSet {
             // 刷新后重新计算菜单高度
             tableView.reloadData()
             updateMenuHeight()
-            updateMenuFrame()
         }
     }
 
     // MARK: - 私有属性
 
     private let tableView = UITableView()
-    /// 记录当前绑定的按钮（用于计算位置）
-    private weak var targetButton: UIButton?
+    /// 记录当前绑定的view（用于计算位置）
+    private weak var targetView: UIView?
     /// 半透明遮罩（点击外部隐藏菜单）
     private let menuMaskView = UIView()
 
@@ -83,28 +82,28 @@ class RTMenu: UIView {
 
     // MARK: - 外部调用方法（显示菜单）
 
-    /// 从指定按钮显示菜单
-    /// - Parameter button: 绑定的按钮（菜单位置基于该按钮计算）
-    func showView(from button: UIButton) {
+    /// 从指定view显示菜单
+    /// - Parameter button: 绑定的view（菜单位置基于该view计算）
+    func showView(from view: UIView) {
         if superview != nil {
             print("当前菜单已显示")
             return
         }
-        // 记录目标按钮
-        targetButton = button
-        // 获取按钮所在控制器的view（作为菜单父视图）
-        guard let parentView = getParentViewControllerView(from: targetButton)
+        // 记录目标view
+        targetView = view
+        // 获取view所在控制器的view（作为菜单父视图）
+        guard let parentView = getParentViewControllerView(from: targetView)
         else {
-            print("未找到按钮所在的控制器视图，菜单显示失败")
+            print("未找到view所在的控制器视图，菜单显示失败")
             return
         }
 
-        // 1. 准备工作：添加到父视图、刷新数据、计算位置
+        // 准备工作：添加到父视图、刷新数据、计算位置
         parentView.addSubview(menuMaskView)
         parentView.addSubview(self)
         menuMaskView.frame = parentView.bounds
 
-        // 2. 显示动画（淡入 + 缩放）
+        // 显示动画（淡入 + 缩放）
         alpha = 0
         transform = CGAffineTransform(scaleX: 0.9, y: 0.9)
         UIView.animate(
@@ -126,7 +125,7 @@ class RTMenu: UIView {
         } completion: { [weak self] _ in
             self?.removeFromSuperview()
             self?.menuMaskView.removeFromSuperview()
-            self?.targetButton = nil
+            self?.targetView = nil
         }
     }
 }
@@ -134,10 +133,13 @@ class RTMenu: UIView {
 // MARK: - 私有 UI 搭建 + 逻辑处理
 
 private extension RTMenu {
-    /// 获取当前view所在的控制器的view（用于菜单添加）
+    /// 获取当前view所在的控制器的view 或者 scrollview（用于菜单添加）
     func getParentViewControllerView(from view: UIView?) -> UIView? {
         var responder: UIResponder? = view
         while responder != nil {
+            if let scrollView = responder as? UIScrollView {
+                return scrollView
+            }
             if let vc = responder as? UIViewController {
                 return vc.view
             }
@@ -162,7 +164,7 @@ private extension RTMenu {
         )
         menuMaskView.addGestureRecognizer(tapMask)
 
-        // 4. 表格配置（展示菜单选项）
+        // 表格配置（展示菜单选项）
         addSubview(tableView)
         tableView.translatesAutoresizingMaskIntoConstraints = false
         NSLayoutConstraint.activate([
@@ -207,7 +209,7 @@ private extension RTMenu {
         }
         menuMaskView.isHidden = !hasMaskView
         updateMenuHeight() // 基于数据源计算菜单高度
-        updateMenuFrame() // 基于按钮位置和枚举计算菜单frame
+        updateMenuFrame() // 基于view位置和枚举计算菜单frame
     }
 
     func addCornerAndShadow(
@@ -252,37 +254,36 @@ private extension RTMenu {
         frame = CGRect(x: 0, y: 0, width: menuWidth, height: height)
     }
 
-    /// 基于按钮位置和枚举，计算菜单最终frame
+    /// 基于view位置和枚举，计算菜单最终frame
     func updateMenuFrame() {
-        guard let button = targetButton, let parentView = superview else {
+        guard let actionView = targetView, let parentView = getParentViewControllerView(from: actionView) else {
             return
         }
-
-        // 1. 获取按钮在父视图中的绝对frame（关键：转换坐标系）
-        let buttonFrame = button.convert(button.bounds, to: parentView)
-
+        // 1. 获取view在父视图中的绝对frame（关键：转换坐标系）
+        let actionViewFrame = actionView.convert(actionView.bounds , to: parentView)
+        
         // 2. 根据枚举计算菜单的origin（x,y）
         var menuOrigin: CGPoint = .zero
         switch menuPosition {
         case .topLeft:
-            // 菜单右下对齐按钮左上 → x=按钮x - 菜单宽度，y=按钮y - 菜单高度
-            menuOrigin.x = buttonFrame.origin.x - menuWidth + buttonFrame.width
-            menuOrigin.y = buttonFrame.origin.y - frame.height - spacing
+            // 菜单右下对齐view左上 → x=viewx - 菜单宽度，y=viewy - 菜单高度
+            menuOrigin.x = actionViewFrame.origin.x - menuWidth + actionViewFrame.width
+            menuOrigin.y = actionViewFrame.origin.y - frame.height - spacing
         case .bottomLeft:
-            // 菜单右上对齐按钮左下 → x=按钮x - 菜单宽度，y=按钮y + 按钮高度 + spacing
-            menuOrigin.x = buttonFrame.origin.x - menuWidth + buttonFrame.width
-            menuOrigin.y = buttonFrame.origin.y + buttonFrame.height + spacing
+            // 菜单右上对齐view左下 → x=viewx - 菜单宽度，y=viewy + view高度 + spacing
+            menuOrigin.x = actionViewFrame.origin.x - menuWidth + actionViewFrame.width
+            menuOrigin.y = actionViewFrame.origin.y + actionViewFrame.height + spacing
         case .topRight:
-            // 菜单左下对齐按钮右上 → x=按钮x，y=按钮y - 菜单高度 - spacing
-            menuOrigin.x = buttonFrame.origin.x
-            menuOrigin.y = buttonFrame.origin.y - frame.height - spacing
+            // 菜单左下对齐view右上 → x=viewx，y=viewy - 菜单高度 - spacing
+            menuOrigin.x = actionViewFrame.origin.x
+            menuOrigin.y = actionViewFrame.origin.y - frame.height - spacing
         case .bottomRight:
-            // 菜单左上对齐按钮右下 → x=按钮x，y=按钮y + 按钮高度 + spacing
-            menuOrigin.x = buttonFrame.origin.x
-            menuOrigin.y = buttonFrame.origin.y + buttonFrame.height + spacing
+            // 菜单左上对齐view右下 → x=viewx，y=viewy + view高度 + spacing
+            menuOrigin.x = actionViewFrame.origin.x
+            menuOrigin.y = actionViewFrame.origin.y + actionViewFrame.height + spacing
         }
 
-        // 3. 边界适配：避免菜单超出父视图（可选优化，防止显示不全）
+        // 边界适配：避免菜单超出父视图（可选优化，防止显示不全）
         let maxX = parentView.bounds.width - frame.width
         let maxY = parentView.bounds.height - frame.height
         menuOrigin.x = max(0, min(menuOrigin.x, maxX))
@@ -312,15 +313,7 @@ extension RTMenu: UITableViewDataSource, UITableViewDelegate {
         }
         cell.selectionStyle = .none
         let item = items[indexPath.row]
-        cell.configItem(item: item)
-        // 配置cell样式（图标+标题）
-        //        cell.imageView?.image = item.image
-        //        cell.imageView?.tintColor = .systemBlue
-        //        cell.textLabel?.text = item.title
-        //        cell.textLabel?.font = UIFont.systemFont(ofSize: 16)
-        //        cell.accessoryType = .disclosureIndicator // 右侧箭头（可选）
-        //        cell.selectionStyle = .default
-
+        cell.configItem(item: item, titleEdge: titleEdge)
         return cell
     }
 
@@ -349,7 +342,7 @@ private class RTMenuItemCell: UITableViewCell {
         fatalError("init(coder:) has not been implemented")
     }
 
-    func configItem(item: RTMenuItem) {
+    func configItem(item: RTMenuItem, titleEdge: UIEdgeInsets) {
         itemImageView.image = item.image
         titleLB.text = item.title
         NSLayoutConstraint.deactivate(titleLBConstraints)
@@ -360,15 +353,15 @@ private class RTMenuItemCell: UITableViewCell {
             titleLBConstraints = [
                 titleLB.topAnchor.constraint(equalTo: contentView.topAnchor),
                 titleLB.leftAnchor.constraint(equalTo: itemImageView.rightAnchor, constant: 8),
-                titleLB.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+                titleLB.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -titleEdge.right),
                 titleLB.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
             ]
         } else {
             itemImageView.isHidden = true
             titleLBConstraints = [
                 titleLB.topAnchor.constraint(equalTo: contentView.topAnchor),
-                titleLB.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
-                titleLB.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -16),
+                titleLB.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: titleEdge.left),
+                titleLB.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -titleEdge.right),
                 titleLB.bottomAnchor.constraint(equalTo: contentView.bottomAnchor)
             ]
         }
@@ -390,7 +383,7 @@ private class RTMenuItemCell: UITableViewCell {
             itemImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),
             itemImageView.heightAnchor.constraint(equalTo: itemImageView.widthAnchor)
         ])
-        
+
         titleLBConstraints = [
             titleLB.topAnchor.constraint(equalTo: contentView.topAnchor),
             titleLB.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 16),

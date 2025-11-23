@@ -6,14 +6,40 @@
 //
 
 import UIKit
+import SnapKit
 
-class ViewController: UIViewController {
-
+class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
+    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        return 20
+    }
+    
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell =  tableView.dequeueReusableCell(withIdentifier: "myCell", for: indexPath)
+        cell.textLabel?.text = "menuBtn"
+        cell.selectionStyle = .none
+        return cell
+    }
+    
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        if let cell = tableView.cellForRow(at: indexPath) {
+            menu.showView(from: cell)
+        }
+    }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+  
+        tableView.delegate = self
+        tableView.dataSource = self
+        view.addSubview(tableView)
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(88)
+            make.left.bottom.right.equalToSuperview()
+        }
+        
         let button = UIButton(type: .custom)
-        button.backgroundColor = UIColor.red
+        button.backgroundColor = UIColor.orange
+        button.setTitle("menuBtn", for: .normal)
         button.addTarget(
             self,
             action: #selector(buttonDidClick(sender:)),
@@ -23,15 +49,21 @@ class ViewController: UIViewController {
         button.frame = CGRect(x: 10, y: 88, width: 100, height: 50)
     }
 
-    @objc func buttonDidClick(sender:UIButton) {
-        // 1. 创建菜单并配置属性
+    let tableView: UITableView = {
+        let table = UITableView(frame: .zero, style: .plain)
+        table.rowHeight = 44
+        table.register(UITableViewCell.self, forCellReuseIdentifier: "myCell")
+        return table
+    }()
+
+    lazy var menu: RTMenu = {
         let menu = RTMenu()
-        menu.menuPosition = .bottomLeft // 显示位置：按钮右下
+        menu.menuPosition = .bottomRight // 显示位置：view右下
         menu.menuWidth = 180 // 菜单宽度
         menu.rowHeight = 48 // 行高
         menu.cornerRadius = 20 // 圆角
-        menu.spacing = 20
-        // 2. 配置数据源（支持动态修改：后续直接给 menu.items 赋值即可）
+        menu.spacing = 10
+        menu.titleEdge = UIEdgeInsets(top: 0, left: 24, bottom: 0, right: 24)
         menu.items = [
             RTMenuItem(title: "选项1", image: UIImage(systemName: "house")) {
                 print("选中选项1")
@@ -44,9 +76,10 @@ class ViewController: UIViewController {
                 print("选中选项3")
             }
         ]
-        
-        // 3. 从按钮显示菜单
+        return menu
+    }()
+
+    @objc func buttonDidClick(sender: UIButton) {
         menu.showView(from: sender)
     }
 }
-
