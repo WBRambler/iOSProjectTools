@@ -78,11 +78,39 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         ]
         return menu
     }()
+    
+//    func randomString(length: Int = 6) -> String {
+//        // 可选字符集：大小写字母 + 数字
+//        let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+//        // 转为字符数组，便于随机取值
+//        let characterArray = Array(characters)
+//        // 生成指定长度的随机字符串
+//        return (0..<length).map { _ in
+//            characterArray[Int.random(in: 0..<characterArray.count)]
+//        }.joined()
+//    }
+    
+    func randomString(length: Int = 6) -> String {
+        let characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+        let characterArray = Array(characters)
+        return (0..<length).map { _ in
+            String(characterArray[Int.random(in: 0..<characterArray.count)]) // 字符转字符串
+        }.joined()
+    }
 
     @objc func buttonDidClick(sender: UIButton) {
 //        menu.showView(from: sender)
 //        showTwoButtonAlert()
-        showScrollableAlert()
+//        showScrollableAlert()
+        // 1. 基础使用（默认2秒消失）
+        let sss = randomString()
+        RTToast.show(sss)
+
+//        // 2. 自定义显示时长（3秒后消失）
+//        RTToast.show("数据加载中...", duration: 3.0)
+////
+////        // 3. 长文本（自动换行）
+//        RTToast.show("这是一个多行文本的Toast提示，测试文本长度超过屏幕宽度85%时的自动换行效果")
     }
     
     func showTwoButtonAlert() {
