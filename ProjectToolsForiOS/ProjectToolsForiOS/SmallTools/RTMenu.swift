@@ -256,7 +256,7 @@ private extension RTMenu {
 
     /// 基于view位置和枚举，计算菜单最终frame
     func updateMenuFrame() {
-        guard let actionView = targetView, let parentView = getParentViewControllerView(from: actionView) else {
+        guard let actionView = targetView, let parentView = superview else {
             return
         }
         // 1. 获取view在父视图中的绝对frame（关键：转换坐标系）

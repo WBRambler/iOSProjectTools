@@ -80,6 +80,53 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }()
 
     @objc func buttonDidClick(sender: UIButton) {
-        menu.showView(from: sender)
+//        menu.showView(from: sender)
+//        showTwoButtonAlert()
+        showScrollableAlert()
+    }
+    
+    func showTwoButtonAlert() {
+        let alertView = RTDefaultAlertView()
+           alertView.title = "确认操作"
+           alertView.message = "是否删除该文件？删除后无法恢复"
+           
+           // 取消按钮（蓝色）
+           let cancelAction = RTAlertAction(title: "取消", style: .cancel) { _ in
+               print("点击了取消按钮")
+           }
+           // 删除按钮（红色）
+           let deleteAction = RTAlertAction(title: "删除", style: .destructive) { _ in
+               print("点击了删除按钮")
+           }
+           
+           alertView.addAction(cancelAction)
+           alertView.addAction(deleteAction)
+           
+           let alertVC = RTAlertContainerViewController(contentView: alertView)
+           present(alertVC, animated: true)
+    }
+
+    func showScrollableAlert() {
+        let alertView = RTDefaultAlertView()
+        alertView.title = "选择选项"
+        alertView.message = "请选择一个操作（超过3个按钮将支持滑动）范德萨范德萨范德萨范德萨发大沙发打撒"
+        
+        // 添加4个按钮
+        let action1 = RTAlertAction(title: "选项1", style: .default) { _ in print("选择选项1") }
+        let action2 = RTAlertAction(title: "选项2", style: .default) { _ in print("选择选项2") }
+        let action3 = RTAlertAction(title: "选项3", style: .default) { _ in print("选择选项3") }
+        let action4 = RTAlertAction(title: "取消", style: .cancel) { _ in print("点击取消") }
+        let action5 = RTAlertAction(title: "选项3", style: .default) { _ in print("选择选项3") }
+//        let action6 = RTAlertAction(title: "取消", style: .cancel) { _ in print("点击取消") }
+        
+        alertView.addAction(action1)
+        alertView.addAction(action2)
+        alertView.addAction(action3)
+//        alertView.addAction(action4)
+//        alertView.addAction(action5)
+//        alertView.addAction(action6)
+        
+        let alertVC = RTAlertContainerViewController(contentView: alertView)
+        present(alertVC, animated: true)
     }
 }
