@@ -67,8 +67,8 @@ class RTAlertContainerViewController: UIViewController, RTAlertContainerDelegate
             // 内容 View 居中，左右边距20，上下边距40（最大宽度/高度限制）
             contentView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             contentView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            contentView.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 20),
-            contentView.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -20),
+            contentView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20),
+            contentView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
             contentView.topAnchor.constraint(greaterThanOrEqualTo: view.topAnchor, constant: 40),
             contentView.bottomAnchor.constraint(lessThanOrEqualTo: view.bottomAnchor, constant: -40)
         ])

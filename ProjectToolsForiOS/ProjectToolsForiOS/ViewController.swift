@@ -103,14 +103,38 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 //        showTwoButtonAlert()
 //        showScrollableAlert()
         // 1. 基础使用（默认2秒消失）
-        let sss = randomString()
-        RTToast.show(sss)
+//        let sss = randomString()
+//        RTToast.show(sss)
 
 //        // 2. 自定义显示时长（3秒后消失）
 //        RTToast.show("数据加载中...", duration: 3.0)
 ////
 ////        // 3. 长文本（自动换行）
 //        RTToast.show("这是一个多行文本的Toast提示，测试文本长度超过屏幕宽度85%时的自动换行效果")
+        
+        showInputAlertView()
+    }
+    
+    func showInputAlertView() {
+        let inputView = RTAlertInputView()
+        inputView.title = "请输入反馈"
+        inputView.message = "请详细描述你的问题（支持多行输入）"
+
+        // 取消按钮
+        let cancelAction = RTAlertAction(title: "取消", style: .cancel) { _ in
+            print("取消输入")
+        }
+        inputView.addAction(cancelAction)
+
+        // 确认按钮
+        let confirmAction = RTAlertAction(title: "提交", style: .default) { [weak inputView] _ in
+            print("用户输入：\(inputView?.inputText ?? "无")")
+        }
+        inputView.addAction(confirmAction)
+
+        // 展示弹窗
+        let alertVC = RTAlertContainerViewController(contentView: inputView)
+        present(alertVC, animated: true)
     }
     
     func showTwoButtonAlert() {
