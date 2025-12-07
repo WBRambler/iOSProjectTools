@@ -5,8 +5,8 @@
 //  Created by WuBo on 2025/11/23.
 //
 
-import UIKit
 import SnapKit
+import UIKit
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
@@ -14,7 +14,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     }
     
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        let cell =  tableView.dequeueReusableCell(withIdentifier: "myCell", for: indexPath)
+        let cell = tableView.dequeueReusableCell(withIdentifier: "myCell", for: indexPath)
         cell.textLabel?.text = "menuBtn"
         cell.selectionStyle = .none
         return cell
@@ -28,7 +28,9 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     override func viewDidLoad() {
         super.viewDidLoad()
-  
+        
+        let s = GoToCell.cell(with: UITableView())
+        
         tableView.delegate = self
         tableView.dataSource = self
         view.addSubview(tableView)
@@ -47,7 +49,53 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         )
         view.addSubview(button)
         button.frame = CGRect(x: 10, y: 88, width: 100, height: 50)
-    }
+        
+        let stackView = DoubleButtonStackView()
+        view.addSubview(stackView)
+        stackView.snp.makeConstraints { make in
+            make.center.equalToSuperview()
+            make.height.equalTo(60)
+        }
+        
+        var ss: [String: Int] = ["1": 1, "3": 3]
+        for index in ss {
+            print(index)
+        }
+
+        // 1. 初始化
+        let orderedDict = RTOrderedDictionary<String, Int>()
+        orderedDict["a"] = 1
+        orderedDict["b"] = 2
+        orderedDict["c"] = 3
+
+        // 2. 字面量初始化
+        let _: RTOrderedDictionary<String, Any> = ["name": "Tom", "age": 20, "gender": "male"]
+
+        // 3. 访问元素
+        print(orderedDict["b"] as Any) // 输出: Optional(2)
+        print(orderedDict[1]) // 输出: Optional((key: "b", value: 2))
+        print(orderedDict.allKeys) // 输出: ["a", "b", "c"]
+        print(orderedDict.allValues) // 输出: [1, 2, 3]
+
+        // 4. 遍历
+        for (key, value) in orderedDict {
+            print("\(key): \(value)")
+        }
+
+        // 5. 移除元素
+        orderedDict.removeValue(forKey: "b")
+        print(orderedDict.count) // 输出: 2
+        print(orderedDict.allKeys) // 输出: ["a", "c"]
+
+        // 6. 索引访问（Collection协议支持）
+        for pair in orderedDict {
+            print(pair) // 输出: (key: "a", value: 1), (key: "c", value: 3)
+        }
+
+        // 7. 检查包含关系
+        print(orderedDict.containsKey("a")) // 输出: true
+        print(orderedDict.containsValue(3)) // 输出: true
+      }
 
     let tableView: UITableView = {
         let table = UITableView(frame: .zero, style: .plain)
@@ -108,8 +156,8 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
 
 //        // 2. 自定义显示时长（3秒后消失）
 //        RTToast.show("数据加载中...", duration: 3.0)
-////
-////        // 3. 长文本（自动换行）
+        ////
+        ////        // 3. 长文本（自动换行）
 //        RTToast.show("这是一个多行文本的Toast提示，测试文本长度超过屏幕宽度85%时的自动换行效果")
         
         showInputAlertView()
@@ -139,23 +187,23 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     
     func showTwoButtonAlert() {
         let alertView = RTDefaultAlertView()
-           alertView.title = "确认操作"
-           alertView.message = "是否删除该文件？删除后无法恢复"
+        alertView.title = "确认操作"
+        alertView.message = "是否删除该文件？删除后无法恢复"
            
-           // 取消按钮（蓝色）
-           let cancelAction = RTAlertAction(title: "取消", style: .cancel) { _ in
-               print("点击了取消按钮")
-           }
-           // 删除按钮（红色）
-           let deleteAction = RTAlertAction(title: "删除", style: .destructive) { _ in
-               print("点击了删除按钮")
-           }
+        // 取消按钮（蓝色）
+        let cancelAction = RTAlertAction(title: "取消", style: .cancel) { _ in
+            print("点击了取消按钮")
+        }
+        // 删除按钮（红色）
+        let deleteAction = RTAlertAction(title: "删除", style: .destructive) { _ in
+            print("点击了删除按钮")
+        }
            
-           alertView.addAction(cancelAction)
-           alertView.addAction(deleteAction)
+        alertView.addAction(cancelAction)
+        alertView.addAction(deleteAction)
            
-           let alertVC = RTAlertContainerViewController(contentView: alertView)
-           present(alertVC, animated: true)
+        let alertVC = RTAlertContainerViewController(contentView: alertView)
+        present(alertVC, animated: true)
     }
 
     func showScrollableAlert() {

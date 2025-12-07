@@ -144,17 +144,18 @@ private extension RTAlertInputView {
         setupLineSpacing(2)
     }
     private func setupLineSpacing(_ spacing: CGFloat) {
-        textView.textAlignment = .center
+        
           // 1. 创建段落样式
           let paragraphStyle = NSMutableParagraphStyle()
           paragraphStyle.lineSpacing = spacing // 行间距（关键属性）
           paragraphStyle.lineBreakMode = .byWordWrapping // 换行模式（可选，默认也可）
-          
+        
           // 2. 配置输入属性（确保新增文本应用行间距）
           textView.typingAttributes = [
               .paragraphStyle: paragraphStyle,
               .font: textView.font ?? UIFont.systemFont(ofSize: 14), // 同步字体（避免输入时字体变化）
-              .foregroundColor: UIColor.black // 文本颜色（可选）
+              .foregroundColor: UIColor.black, // 文本颜色（可选）
+              
           ]
           
           // 3. 同步已有文本的行间距（如果文本已存在）
@@ -166,6 +167,7 @@ private extension RTAlertInputView {
                   range: NSRange(location: 0, length: text.count)
               )
               textView.attributedText = attributedText
+             
           }
       }
     
