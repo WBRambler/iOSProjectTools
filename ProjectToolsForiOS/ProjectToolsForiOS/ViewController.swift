@@ -29,13 +29,13 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     override func viewDidLoad() {
         super.viewDidLoad()
   
-//        tableView.delegate = self
-//        tableView.dataSource = self
-//        view.addSubview(tableView)
-//        tableView.snp.makeConstraints { make in
-//            make.top.equalTo(88)
-//            make.left.bottom.right.equalToSuperview()
-//        }
+        tableView.delegate = self
+        tableView.dataSource = self
+        view.addSubview(tableView)
+        tableView.snp.makeConstraints { make in
+            make.top.equalTo(88)
+            make.left.bottom.right.equalToSuperview()
+        }
         
         let button = UIButton(type: .custom)
         button.backgroundColor = UIColor.orange
